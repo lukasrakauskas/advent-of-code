@@ -1,5 +1,6 @@
 {
   "deno.enable": true,
+  "typescript.validate.enable": false,
   "[javascript,typescript,javascriptreact,typescriptreact]": {
     "editor.defaultFormatter": "denoland.vscode-deno"
   }
