@@ -23,7 +23,7 @@ const versusMap = new Map([
   ["C X", 6],
 ]);
 
-const map = {
+const replaceMap = {
   X: {
     A: "Z",
     B: "X",
@@ -41,15 +41,18 @@ const map = {
   },
 };
 
-for (const line of lines) {
-  const [p1, p2] = line.split(" ") as ["A" | "B" | "C", "X" | "Y" | "Z"];
+for (const originalLine of lines) {
+  const [p1, originalP2] = originalLine.split(" ") as [
+    "A" | "B" | "C",
+    "X" | "Y" | "Z"
+  ];
 
-  const newP2 = map[p2][p1];
+  const p2 = replaceMap[originalP2][p1];
 
-  const newLine = `${p1} ${newP2}`;
+  const line = `${p1} ${p2}`;
 
-  score += scoreMap.get(newP2) ?? 0;
-  score += versusMap.get(newLine) ?? 0;
+  score += scoreMap.get(p2) ?? 0;
+  score += versusMap.get(line) ?? 0;
 }
 
 console.log(`Score: ${score}`);
