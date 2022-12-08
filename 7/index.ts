@@ -7,35 +7,36 @@ type Dir = { name: string; files: Array<File | Dir> };
 const isFile = (it: File | Dir): it is File => "size" in it;
 const isDir = (it: File | Dir): it is Dir => "files" in it;
 
-const qualifyingDirs: Array<{ name: string; size: bigint }> = [];
+const qualifyingDirs: Array<{ name: string; size: number }> = [];
+const allDirs: Array<{ name: string; size: number }> = [];
 
-const getDirSize = (dir: Dir): bigint => {
+const totalSpace = 70000000;
+const needSpace = 30000000;
+
+const getDirSize = ({ name, files }: Dir): number => {
   const dirs: Dir[] = [];
-  let size = 0n;
+  let size = 0;
 
-  for (const it of dir.files) {
+  for (const it of files) {
     if (isDir(it)) dirs.push(it);
     if (isFile(it)) {
-      size += BigInt(it.size);
+      size += Number(it.size);
     }
   }
 
-  const childDirSize =
+  size +=
     dirs.length === 0
-      ? 0n
-      : dirs.reduce<bigint>((s, dir) => {
+      ? 0
+      : dirs.reduce<number>((s, dir) => {
           return s + getDirSize(dir);
-        }, 0n);
+        }, 0);
 
-  const totalSize = childDirSize + size;
-
-  console.log({ name: dir.name, size, childs: childDirSize });
-
-  if (totalSize <= 100000n) {
-    qualifyingDirs.push({ name: dir.name, size: totalSize });
+  if (size <= 100000) {
+    qualifyingDirs.push({ name, size });
   }
+  allDirs.push({ name, size });
 
-  return totalSize;
+  return size;
 };
 
 const fileSystem: Dir = {
@@ -85,6 +86,26 @@ for (const line of lines) {
   }
 }
 
-getDirSize(fileSystem);
-// console.log(JSON.stringify(fileSystem, null, 2));
-console.log(qualifyingDirs.reduce((sum, dir) => sum + dir.size, 0n));
+const usedSpace = Number(getDirSize(fileSystem));
+
+console.log(
+  "Problem one:",
+  qualifyingDirs.reduce((sum, dir) => sum + dir.size, 0).toString()
+);
+
+const freeSpace = totalSpace - usedSpace;
+const needToFreeUp = needSpace - freeSpace;
+
+const deleteDir = allDirs
+  .filter((it) => it.size > needToFreeUp)
+  .reduce((min, current) => {
+    const minDirSize = Math.min(min.size, current.size);
+
+    if (minDirSize == min.size) {
+      return min;
+    } else {
+      return current;
+    }
+  });
+
+console.log("Problem two:", deleteDir.name, deleteDir.size);
